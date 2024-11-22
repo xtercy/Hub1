@@ -1628,6 +1628,79 @@ function CFAHub:CreateWindow(title, gameName, intro)
                 end)
             end -- Final
 
+            function Elements:CreateToggleKeyBind(bindtitle, keycodename, callback)
+                bindtitle = bindtitle or "Bind"
+                keycodename = keycodename or "F"
+                callback = callback or function() end
+            
+                local Default = keycodename
+                local Type = tostring(Default):match("UserInputType") and "UserInputType" or "KeyCode"
+                keycodename = tostring(keycodename):gsub("Enum.UserInputType.", "")
+                keycodename = tostring(keycodename):gsub("Enum.KeyCode.", "")
+            
+                -- Create UI elements (TextButton, etc.)
+                local BindButton = Instance.new("TextButton")
+                local BindText = Instance.new("TextLabel")
+                local KeyCode = Instance.new("Frame")
+                local BindKeyCode = Instance.new("TextLabel")
+            
+                -- Setup BindButton properties
+                BindButton.Name = "BindButton"
+                BindButton.Parent = Section1
+                BindButton.Size = UDim2.new(0, 440, 0, 34)
+                BindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                BindButton.Text = ""
+                
+                -- Setup BindText properties
+                BindText.Name = "BindText"
+                BindText.Parent = BindButton
+                BindText.Size = UDim2.new(0, 283, 0, 34)
+                BindText.Text = bindtitle
+                BindText.TextColor3 = Color3.fromRGB(255, 255, 255)
+                BindText.TextSize = 22
+            
+                -- Setup KeyCode properties
+                KeyCode.Name = "KeyCode"
+                KeyCode.Parent = BindButton
+                KeyCode.Size = UDim2.new(0, 148, 0, 24)
+                KeyCode.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+                
+                -- Setup BindKeyCode properties
+                BindKeyCode.Name = "BindKeyCode"
+                BindKeyCode.Parent = KeyCode
+                BindKeyCode.Size = UDim2.new(1, 0, 1, 0)
+                BindKeyCode.Text = keycodename
+                BindKeyCode.TextColor3 = Color3.fromRGB(255, 255, 255)
+                BindKeyCode.TextSize = 19
+            
+                -- Function to toggle the UI with animation
+                local isUIOpen = false
+                local function toggleUI()
+                    if isUIOpen then
+                        Utility:TweenObject(UIScale, {Scale = 0.95}, 0.25)
+                        wait(0.25)
+                        Container.Visible = false
+                    else
+                        Utility:TweenObject(UIScale, {Scale = 1.0}, 0.25)
+                        Container.Visible = true
+                    end
+                    isUIOpen = not isUIOpen
+                end
+            
+                -- Listen for key press to toggle UI
+                BindButton.MouseButton1Click:Connect(function()
+                    BindKeyCode.Text = "..."
+                    local connection
+                    connection = game:GetService("UserInputService").InputBegan:Connect(function(input)
+                        if input.KeyCode == Enum.KeyCode[keycodename] then
+                            toggleUI()
+                            callback(input.KeyCode)
+                            connection:Disconnect()
+                        end
+                    end)
+                end)
+            end
+
             function Elements:CreateKeybind(bindtitle, keycodename, callback)
                 bindtitle = bindtitle or "Bind"
                 callback = callback or function() end
